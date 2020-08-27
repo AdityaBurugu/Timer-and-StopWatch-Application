@@ -3,10 +3,12 @@ from PyQt5.QtWidgets import QApplication, QMainWindow,QDateEdit,QFrame, QPushBut
     QVBoxLayout,QWidget
 import sys
 from PyQt5 import QtGui, QtCore, QtWidgets
+
 from PyQt5.QtCore import QRect,QTimer
 import cv2
+from ONVIFCameraControl import ONVIFCameraControl,ONVIFCameraControlError
 import numpy as np
-from time import strftime
+from time import strftime,sleep
 
 #import dlib
 fwidth = 400
@@ -79,31 +81,28 @@ class FrameGrabber(QtCore.QThread):
         static_back = None
         #CamIP = "192.168.1.23"
         #cap = cv2.VideoCapture(0)
-        cap = cv2.VideoCapture(f'rtsp://admin:admin@{self.CamIP}:554/cam/realmonitor?channel=1&subtype=0')
+        cap = cv2.VideoCapture(f'rtsp://admin:admin@{self.CamIP}:554/cam/realmonitor?channel=1&subtype=2')
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 400)
         #width = camera.set(CAP_PROP_FRAME_WIDTH, 1600)
         #height = camera.set(CAP_PROP_FRAME_HEIGHT, 1080)
-        cap.set(cv2.CAP_PROP_FPS, 4)
+       # cap.set(cv2.CAP_PROP_FPS, 4)
         while cap.isOpened():
             #if self.SetNormalVideo == True:
-            success, frame = cap.read()
+            for _ in range(1):
+                success, frame = cap.read()
             if self.windowzoomsize == 2:
                 success, frame = cap.read()
                 success, frame = cap.read()
                 success, frame = cap.read()
                 success, frame = cap.read()
             if self.SetFaceDetection == True:
-                success, frame = cap.read()
-                success, frame = cap.read()
-                success, frame = cap.read()
-                success, frame = cap.read()
-                success, frame = cap.read()
+                for _ in range(5):
+                    success, frame = cap.read()
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 faces = face_cascade.detectMultiScale(gray, 1.2, 4)
                 for (x, y, w, h) in faces:
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-
             elif self.SetMotionDetection == True :
                 frame1 = frame
                 success, frame2 = cap.read()
@@ -121,11 +120,9 @@ class FrameGrabber(QtCore.QThread):
                     self.signalm.emit(thresh)
                     frame1 = frame2
                     success, frame2 = cap.read()
-
                 except:
                     print('error in motion detetion')
                     #self.signalm.emit(frame)
-
             if success:
                 self.image = QtGui.QImage(frame, frame.shape[1], frame.shape[0], QtGui.QImage.Format_BGR888)
                 if self.windowzoomsize == 0:
@@ -137,6 +134,7 @@ class FrameGrabber(QtCore.QThread):
                     self.image = self.image.scaled(1280,1080)
                 #if self.SetMotionDetection == False :
                 self.signal.emit(self.image)
+                #self.signalm.emit(frame)
 
 class Window(QMainWindow):
     def __init__(self, windowTitle,CamIP):
@@ -157,12 +155,15 @@ class Window(QMainWindow):
         self.UiComponents()
         self.grabber = FrameGrabber()
         self.grabber.CamIP = CamIP
+        self.cam = ONVIFCameraControl((CamIP, 80), "admin", "admin")
         self.grabber.signal.connect(self.updateFrame)
         self.grabber.signalm.connect(self.motionimage)
         self.grabber.start()
+        #self.cam = ONVIFCameraControl((CamIP, 80), "admin", "admin")
+        #self.cam.goto_preset(preset_token="2")
         self.timer = QTimer(self)
         self.time = 30
-        self.timer.start(1000)
+        self.timer.start(5000)
         print(self.timer.remainingTime())
         self.timer.timeout.connect(self.Fun_Exit)
         #self.timer =
@@ -180,7 +181,7 @@ class Window(QMainWindow):
         font.setWeight(750)
         self.lcd.setFont(font)
         self.color_effect = QtWidgets.QGraphicsColorizeEffect()
-        self.color_effect.setColor(QtCore.Qt.darkBlue)
+        self.color_effect.setColor(QtCore.Qt.yellow)
         self.lcd.setGraphicsEffect(self.color_effect)
         self.lcd.setStyleSheet("border-radius : 30;border: 2px solid red;")
         self.lcd.setText("Time Remaining :" + str(self.time) + "Seconds")
@@ -199,7 +200,7 @@ class Window(QMainWindow):
         self.T_Maximize = "Maximize"
         toolbar = QToolBar()
         toolbar.setMovable(False)
-        toolbar.setIconSize(QtCore.QSize(25, 25))
+        toolbar.setIconSize(QtCore.QSize(15, 15))
         self.addToolBar(toolbar)
         self.Face = QAction(QtGui.QIcon("../Resources/Face2.jpg"), self.T_FaceDetect, self)  # add student icon
         self.Face.triggered.connect(self.Face_Detect)
@@ -231,11 +232,11 @@ class Window(QMainWindow):
         self.Right.setStatusTip("Move Right")
         self.ZoomIn = QAction(QtGui.QIcon("../Resources/ZoomIn.png"),self.T_ZoomIn, self)  # add student icon
         self.ZoomIn.triggered.connect(self.Zoom_In)
-        self.ZoomIn.setShortcut("Ctrl+=")
+        self.ZoomIn.setShortcut("=")
         self.ZoomIn.setStatusTip("Zoom In")
         self.ZoomOut = QAction(QtGui.QIcon("../Resources/ZoomOut.png"), self.T_ZoomOut, self)  # add student icon
         self.ZoomOut.triggered.connect(self.Zoom_Out)
-        self.ZoomOut.setShortcut("Ctrl+-")
+        self.ZoomOut.setShortcut("-")
         self.ZoomOut.setStatusTip("Zoom Out")
         self.Maximize = QAction(QtGui.QIcon("../Resources/Minimize.png"),self.T_Maximize,self)
         self.Maximize.triggered.connect(self.Fun_Maximize)
@@ -278,46 +279,73 @@ class Window(QMainWindow):
     def Face_Detect(self):
         print("Function Face Detect Connected")
         if self.grabber.SetFaceDetection == True :
+            self.statusBar().showMessage("Face Detection Stopped")
             self.grabber.SetFaceDetection = False
         else :
             self.grabber.SetFaceDetection = True
+            self.statusBar().showMessage("Face Detection Started")
 
 
         self.grabber.SetMotionDetection = False
-        self.statusBar().showMessage("Face Detection Started")
+
 
 
     def Motion_Detect(self):
         print("Function Motion Detect Connected")
         if self.grabber.SetMotionDetection == True:
+            self.statusBar().showMessage("Motion Detection Stopped")
             self.grabber.SetMotionDetection = False
             try:
                 cv2.destroyWindow("motion video")
             except:
                 print('motion video already closed')
         else:
+            self.statusBar().showMessage("Motion Detection Started")
             self.grabber.SetMotionDetection = True
 
 
 
         self.grabber.SetFaceDetection = False
-        self.statusBar().showMessage("Motion Detected")
 
     def Fun_Record(self):
         print("Function Record Connected")
         self.statusBar().showMessage("Started Recording")
     def Move_Up(self):
         print("Function Move Up Connected")
+        ptz_velocity_vector = (0, -0.85, 0)
+        self.cam.move_continuous(ptz_velocity_vector)
+        sleep(0.25)
+        self.cam.stop()
     def Move_Down(self):
         print("Function Move Down Connected")
+        ptz_velocity_vector = (0, 0.85, 0)
+        self.cam.move_continuous(ptz_velocity_vector)
+        sleep(0.25)
+        self.cam.stop()
     def Move_Left(self):
         print("Function Move Left Connected")
+        ptz_velocity_vector = (-0.85, 0, 0)
+        self.cam.move_continuous(ptz_velocity_vector)
+        sleep(0.25)
+        self.cam.stop()
     def Move_Right(self):
         print("Function Move Right Connected")
+        ptz_velocity_vector = (0.85, 0, 0)
+        self.cam.move_continuous(ptz_velocity_vector)
+        sleep(0.25)
+        self.cam.stop()
     def Zoom_In(self):
         print("Function Zoom In Connected")
+        ptz_velocity_vector = (0, 0, 0.25)
+        self.cam.move_continuous(ptz_velocity_vector)
+        sleep(1)
+        self.cam.stop()
     def Zoom_Out(self):
         print("Function Zoom Out Connected")
+        ptz_velocity_vector = (0, 0, -0.25)
+        self.cam.move_continuous(ptz_velocity_vector)
+        sleep(1)
+        self.cam.stop()
     def Fun_Maximize(self):
         self.move(200,5)
         self.grabber.windowzoomsize = (self.grabber.windowzoomsize + 1) % 2
@@ -326,21 +354,22 @@ class Window(QMainWindow):
         self.time=30
 
     def Fun_Exit(self):
-        self.lcd.setText("Time Remaining :"+str(self.time)+"Seconds")
+        self.lcd.setText("Time Remaining :"+str(self.time)+" Seconds")
         if self.time==0:
             QApplication.quit()
         elif(self.time>5):
-            self.lcd.setText("Time Remaining :" + str(self.time) + "Seconds")
-            self.color_effect.setColor(QtCore.Qt.darkBlue)
+           # self.lcd.setText("Time Remaining :" + str(self.time) + " Seconds")
+
+            self.color_effect.setColor(QtCore.Qt.yellow)
             self.lcd.setGraphicsEffect(self.color_effect)
             self.time = self.time - 1
         elif(self.time<=5):
-            self.lcd.setText("Time Remaining :" + str(self.time) + "Seconds")
-            self.color_effect.setColor(QtCore.Qt.darkRed)
+            #self.lcd.setText("Time Remaining :" + str(self.time) + " Seconds")
+            self.color_effect.setColor(QtCore.Qt.white)
             self.lcd.setGraphicsEffect(self.color_effect)
             self.time = self.time - 1
         elif(self.time==1):
-            self.lcd.setText("Time Remaining :" + str(self.time) + "Second")
+            #self.lcd.setText("Time Remaining :" + str(self.time) + " Second")
             self.time=self.time-1
         else:
             self.time=self.time-1
@@ -362,7 +391,6 @@ class Window(QMainWindow):
 
     @QtCore.pyqtSlot(np.ndarray)
     def motionimage(self, image):
-
         #print('Cv2.show')
         cv2.imshow("motion video", image)
         #cv2.resize("motion video",(800,600))
@@ -370,7 +398,7 @@ class Window(QMainWindow):
 def Main():
     App = QApplication(sys.argv)
     windowTitle = "Camera1"
-    CamIP = "192.168.1.23"
+    CamIP = "192.168.1.10"
     window = Window(windowTitle,CamIP)
     sys.exit(App.exec())
 
