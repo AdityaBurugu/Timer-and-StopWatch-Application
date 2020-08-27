@@ -17,7 +17,7 @@ face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 # This allows us to detect faces in images
 #face_detector = dlib.get_frontal_face_detector()
 fgbg = cv2.createBackgroundSubtractorMOG2()
-class InsertDialog(QtWidgets.QDialog):
+class Shortcuts(QtWidgets.QDialog):
     def __init__(self, *args, **kwargs):
         super(InsertDialog, self).__init__(*args, **kwargs)
 
@@ -377,7 +377,7 @@ class Window(QMainWindow):
         QApplication.quit()
 
     def Fun_About(self):
-        dlg = InsertDialog()
+        dlg = Shortcuts()
         dlg.exec_()
 
     @QtCore.pyqtSlot(QtGui.QImage)
