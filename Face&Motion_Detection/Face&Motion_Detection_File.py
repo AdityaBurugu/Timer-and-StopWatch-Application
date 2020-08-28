@@ -104,10 +104,12 @@ class FrameGrabber(QtCore.QThread):
             if self.SetFaceDetection == True:
                 for _ in range(5):
                     success, frame = cap.read()
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                frame1 = rescale_frame(frame,25)
+                gray = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
                 faces = face_cascade.detectMultiScale(gray, 1.2, 4)
                 for (x, y, w, h) in faces:
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                    cv2.rectangle(frame1, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                frame = frame1
             elif self.SetMotionDetection == True :
                 frame1 = frame
                 success, frame2 = cap.read()
@@ -168,14 +170,14 @@ class Window(QMainWindow):
         #self.cam = ONVIFCameraControl((CamIP, 80), "admin", "admin")
         #self.cam.goto_preset(preset_token="2")
         self.timer = QTimer(self)
-        self.time = 30
+        self.time = 40
         self.timer.start(1000)
         print(self.timer.remainingTime())
         self.timer.timeout.connect(self.Fun_Exit)
         self.show()
 
     def UiComponents(self):
-        self.time = 30
+        self.time = 40
         self.timer = QTimer(self)
         self.lcd = QtWidgets.QLabel(self)
 
@@ -222,19 +224,19 @@ class Window(QMainWindow):
         self.Up = QAction(QtGui.QIcon("../Resources/Up.jpg"), self.T_MoveUp, self)  # add student icon
         self.Up.triggered.connect(self.Move_Up)
         self.Up.setShortcut("Up")
-        self.Up.setStatusTip("Move Up")
+        self.Up.setStatusTip("Cam Tilt Up")
         self.Down = QAction(QtGui.QIcon("../Resources/Down.jpg"), self.T_MoveDown, self)  # add student icon
         self.Down.triggered.connect(self.Move_Down)
         self.Down.setShortcut("Down")
-        self.Down.setStatusTip("Move Down")
+        self.Down.setStatusTip("Cam Tilt Down")
         self.Left = QAction(QtGui.QIcon("../Resources/Left.jpg"), self.T_MoveLeft, self)  # add student icon
         self.Left.triggered.connect(self.Move_Left)
         self.Left.setShortcut("Left")
-        self.Left.setStatusTip("Move Left")
+        self.Left.setStatusTip("Pan Left")
         self.Right = QAction(QtGui.QIcon("../Resources/Right.jpg"), self.T_MoveRight, self)  # add student icon
         self.Right.triggered.connect(self.Move_Right)
         self.Right.setShortcut("Right")
-        self.Right.setStatusTip("Move Right")
+        self.Right.setStatusTip("Pan Right")
         self.ZoomIn = QAction(QtGui.QIcon("../Resources/ZoomIn.png"),self.T_ZoomIn, self)  # add student icon
         self.ZoomIn.triggered.connect(self.Zoom_In)
         self.ZoomIn.setShortcut("=")
@@ -357,7 +359,7 @@ class Window(QMainWindow):
 
     def Funtion_Time(self):
         self.lcd.clear()
-        self.time=30
+        self.time=40
 
     def Fun_Exit(self):
         #self.lcd.setText("Time Remaining :"+str(self.time)+" Seconds")
