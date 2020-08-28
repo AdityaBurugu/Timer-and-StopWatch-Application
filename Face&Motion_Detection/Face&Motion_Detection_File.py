@@ -17,9 +17,14 @@ face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 # This allows us to detect faces in images
 #face_detector = dlib.get_frontal_face_detector()
 fgbg = cv2.createBackgroundSubtractorMOG2()
+def rescale_frame(frame, percent=75):
+    width = int(frame.shape[1] * percent / 100)
+    height = int(frame.shape[0] * percent / 100)
+    dim = (width, height)
+    return cv2.resize(frame, dim, interpolation=cv2.INTER_AREA)
 class Shortcuts(QtWidgets.QDialog):
     def __init__(self, *args, **kwargs):
-        super(InsertDialog, self).__init__(*args, **kwargs)
+        super(Shortcuts, self).__init__(*args, **kwargs)
 
         self.setWindowTitle("Shortcuts")
         self.setWindowIcon(QtGui.QIcon("../Resources/About.png"))
@@ -56,7 +61,7 @@ class Shortcuts(QtWidgets.QDialog):
         self.tableWidget.setItem(9, 0, QTableWidgetItem("Maximize"))
         self.tableWidget.setItem(9, 1, QTableWidgetItem("Alt+M"))
         self.tableWidget.setItem(10, 0, QTableWidgetItem("Increase Time Duration"))
-        self.tableWidget.setItem(10, 1, QTableWidgetItem("Alt+I"))
+        self.tableWidget.setItem(10, 1, QTableWidgetItem("T"))
         self.tableWidget.setItem(11, 0, QTableWidgetItem("Exit"))
         self.tableWidget.setItem(11, 1, QTableWidgetItem("Esc"))
         self.tableWidget.setItem(12, 0, QTableWidgetItem("About"))
@@ -117,7 +122,8 @@ class FrameGrabber(QtCore.QThread):
                     _, thresh = cv2.threshold(blur, 20, 255, cv2.THRESH_BINARY)
                    # frame = np.ndarray(thresh)
                     #print(type(thresh))
-                    self.signalm.emit(thresh)
+                    thresh1 = rescale_frame(thresh,30)
+                    self.signalm.emit(thresh1)
                     frame1 = frame2
                     success, frame2 = cap.read()
                 except:
@@ -163,17 +169,16 @@ class Window(QMainWindow):
         #self.cam.goto_preset(preset_token="2")
         self.timer = QTimer(self)
         self.time = 30
-        self.timer.start(5000)
+        self.timer.start(1000)
         print(self.timer.remainingTime())
         self.timer.timeout.connect(self.Fun_Exit)
-        #self.timer =
         self.show()
 
     def UiComponents(self):
         self.time = 30
         self.timer = QTimer(self)
         self.lcd = QtWidgets.QLabel(self)
-        #self.lcd.
+
         font = QtGui.QFont()  # Sets Font
         font.setPointSize(14)
         font.setBold(True)
@@ -183,9 +188,9 @@ class Window(QMainWindow):
         self.color_effect = QtWidgets.QGraphicsColorizeEffect()
         self.color_effect.setColor(QtCore.Qt.yellow)
         self.lcd.setGraphicsEffect(self.color_effect)
-        self.lcd.setStyleSheet("border-radius : 30;border: 2px solid red;")
+        self.lcd.setStyleSheet("border-radius : 30;border: 2px solid blue;")
         self.lcd.setText("Time Remaining :" + str(self.time) + "Seconds")
-        self.lcd.setGeometry(500,80,290,30)
+        self.lcd.setGeometry(500,50,290,30)
 
         self.timer.start(self.time * 1000)
         self.T_FaceDetect = "Face Detect"
@@ -200,7 +205,7 @@ class Window(QMainWindow):
         self.T_Maximize = "Maximize"
         toolbar = QToolBar()
         toolbar.setMovable(False)
-        toolbar.setIconSize(QtCore.QSize(15, 15))
+        toolbar.setIconSize(QtCore.QSize(35, 35))
         self.addToolBar(toolbar)
         self.Face = QAction(QtGui.QIcon("../Resources/Face2.jpg"), self.T_FaceDetect, self)  # add student icon
         self.Face.triggered.connect(self.Face_Detect)
@@ -244,7 +249,7 @@ class Window(QMainWindow):
         self.Maximize.setStatusTip("Maximize")
         self.TimeIncrement = QtWidgets.QAction(QtGui.QIcon("../Resources/Clock.jpg"),"Clock",self)
         self.TimeIncrement.triggered.connect(self.Funtion_Time)
-        self.TimeIncrement.setShortcut("Alt+I")
+        self.TimeIncrement.setShortcut("T")
         self.TimeIncrement.setStatusTip("Clock")
         self.Exit = QAction(QtGui.QIcon("../Resources/Exit1.png"),"Exit",self)
         self.Exit.setShortcut("Esc")
@@ -312,37 +317,37 @@ class Window(QMainWindow):
         self.statusBar().showMessage("Started Recording")
     def Move_Up(self):
         print("Function Move Up Connected")
-        ptz_velocity_vector = (0, -0.85, 0)
+        ptz_velocity_vector = (0, 0.25, 0)
         self.cam.move_continuous(ptz_velocity_vector)
         sleep(0.25)
         self.cam.stop()
     def Move_Down(self):
         print("Function Move Down Connected")
-        ptz_velocity_vector = (0, 0.85, 0)
+        ptz_velocity_vector = (0, -0.25, 0)
         self.cam.move_continuous(ptz_velocity_vector)
         sleep(0.25)
         self.cam.stop()
     def Move_Left(self):
         print("Function Move Left Connected")
-        ptz_velocity_vector = (-0.85, 0, 0)
+        ptz_velocity_vector = (-0.25, 0, 0)
         self.cam.move_continuous(ptz_velocity_vector)
         sleep(0.25)
         self.cam.stop()
     def Move_Right(self):
         print("Function Move Right Connected")
-        ptz_velocity_vector = (0.85, 0, 0)
+        ptz_velocity_vector = (0.25, 0, 0)
         self.cam.move_continuous(ptz_velocity_vector)
         sleep(0.25)
         self.cam.stop()
     def Zoom_In(self):
         print("Function Zoom In Connected")
-        ptz_velocity_vector = (0, 0, 0.25)
+        ptz_velocity_vector = (0, 0, 0.05)
         self.cam.move_continuous(ptz_velocity_vector)
         sleep(1)
         self.cam.stop()
     def Zoom_Out(self):
         print("Function Zoom Out Connected")
-        ptz_velocity_vector = (0, 0, -0.25)
+        ptz_velocity_vector = (0, 0, -0.05)
         self.cam.move_continuous(ptz_velocity_vector)
         sleep(1)
         self.cam.stop()
@@ -351,27 +356,30 @@ class Window(QMainWindow):
         self.grabber.windowzoomsize = (self.grabber.windowzoomsize + 1) % 2
 
     def Funtion_Time(self):
+        self.lcd.clear()
         self.time=30
 
     def Fun_Exit(self):
-        self.lcd.setText("Time Remaining :"+str(self.time)+" Seconds")
+        #self.lcd.setText("Time Remaining :"+str(self.time)+" Seconds")
         if self.time==0:
             QApplication.quit()
         elif(self.time>5):
-           # self.lcd.setText("Time Remaining :" + str(self.time) + " Seconds")
-
+            self.lcd.clear()
+            self.lcd.setText("Time Remaining :" + str(self.time) + " Seconds")
+            self.time = self.time - 1
             self.color_effect.setColor(QtCore.Qt.yellow)
             self.lcd.setGraphicsEffect(self.color_effect)
-            self.time = self.time - 1
         elif(self.time<=5):
-            #self.lcd.setText("Time Remaining :" + str(self.time) + " Seconds")
+            self.lcd.clear()
+            self.lcd.setText("Time Remaining :" + str(self.time) + " Seconds")
+            self.time = self.time - 1
             self.color_effect.setColor(QtCore.Qt.white)
             self.lcd.setGraphicsEffect(self.color_effect)
-            self.time = self.time - 1
         elif(self.time==1):
             #self.lcd.setText("Time Remaining :" + str(self.time) + " Second")
             self.time=self.time-1
         else:
+            self.lcd.clear()
             self.time=self.time-1
     def Main_Exit(self):
         QApplication.quit()
@@ -393,12 +401,11 @@ class Window(QMainWindow):
     def motionimage(self, image):
         #print('Cv2.show')
         cv2.imshow("motion video", image)
-        #cv2.resize("motion video",(800,600))
 
 def Main():
     App = QApplication(sys.argv)
-    windowTitle = "Camera1"
     CamIP = "192.168.1.10"
+    windowTitle = CamIP
     window = Window(windowTitle,CamIP)
     sys.exit(App.exec())
 
