@@ -172,15 +172,14 @@ class Window(QMainWindow):
         self.timer = QTimer(self)
         self.time = 40
         self.timer.start(1000)
-        print(self.timer.remainingTime())
         self.timer.timeout.connect(self.Fun_Exit)
         self.show()
 
     def UiComponents(self):
         self.time = 40
         self.timer = QTimer(self)
+        self.timer1 = QTimer(self)
         self.lcd = QtWidgets.QLabel(self)
-
         font = QtGui.QFont()  # Sets Font
         font.setPointSize(14)
         font.setBold(True)
@@ -192,7 +191,20 @@ class Window(QMainWindow):
         self.lcd.setGraphicsEffect(self.color_effect)
         self.lcd.setStyleSheet("border-radius : 30;border: 2px solid blue;")
         self.lcd.setText("Time Remaining :" + str(self.time) + "Seconds")
-        self.lcd.setGeometry(500,50,290,30)
+        self.lcd.setGeometry(510,50,290,30)
+
+        self.message = QtWidgets.QLabel(self)
+        font = QtGui.QFont()  # Sets Font
+        font.setPointSize(14)
+        font.setBold(True)
+        font.setItalic(True)
+        font.setWeight(750)
+        self.message.setFont(font)
+        self.color_effect1 = QtWidgets.QGraphicsColorizeEffect()
+        self.color_effect1.setColor(QtCore.Qt.green)
+        self.message.setGraphicsEffect(self.color_effect1)
+        self.message.setGeometry(517, 90, 290, 30)
+        self.message.hide()
 
         self.timer.start(self.time * 1000)
         self.T_FaceDetect = "Face Detect"
@@ -207,33 +219,36 @@ class Window(QMainWindow):
         self.T_Maximize = "Maximize"
         toolbar = QToolBar()
         toolbar.setMovable(False)
-        toolbar.setIconSize(QtCore.QSize(35, 35))
+        toolbar.setIconSize(QtCore.QSize(51, 35))
+        toolbar.setStyleSheet("background-color : white")
         self.addToolBar(toolbar)
-        self.Face = QAction(QtGui.QIcon("../Resources/Face2.jpg"), self.T_FaceDetect, self)  # add student icon
+        self.Face = QAction(QtGui.QIcon("../Resources/Face2.png"), self.T_FaceDetect, self)  # add student icon
         self.Face.triggered.connect(self.Face_Detect)
         self.Face.setShortcut("F1")
         self.Face.setStatusTip("Face Detect")
-        self.Motion = QAction(QtGui.QIcon("../Resources/Motion.png"), self.T_motionDetect, self)  # add student icon
+        self.Motion = QtWidgets.QAction(QtGui.QIcon("../Resources/Motion.png"), self.T_motionDetect, self)  # add student icon
+        #self.Motion.setIconSize(QtCore.QSize(40, 40))
         self.Motion.triggered.connect(self.Motion_Detect)
         self.Motion.setShortcut("M")
         self.Motion.setStatusTip("Motion Detect")
-        self.Record = QAction(QtGui.QIcon("../Resources/re.png"), self.T_record, self)  # add student icon
+        self.Record = QAction(QtGui.QIcon("../Resources/record.png"), self.T_record, self)  # add student icon
         self.Record.triggered.connect(self.Fun_Record)
         self.Record.setShortcut("Ctrl+R")
         self.Record.setStatusTip("Record")
-        self.Up = QAction(QtGui.QIcon("../Resources/Up.jpg"), self.T_MoveUp, self)  # add student icon
+        self.Up = QAction(QtGui.QIcon("../Resources/Up.png"), self.T_MoveUp, self)  # add student icon
         self.Up.triggered.connect(self.Move_Up)
         self.Up.setShortcut("Up")
+        self.Up.setCheckable(True)
         self.Up.setStatusTip("Cam Tilt Up")
-        self.Down = QAction(QtGui.QIcon("../Resources/Down.jpg"), self.T_MoveDown, self)  # add student icon
+        self.Down = QAction(QtGui.QIcon("../Resources/Down.png"), self.T_MoveDown, self)  # add student icon
         self.Down.triggered.connect(self.Move_Down)
         self.Down.setShortcut("Down")
         self.Down.setStatusTip("Cam Tilt Down")
-        self.Left = QAction(QtGui.QIcon("../Resources/Left.jpg"), self.T_MoveLeft, self)  # add student icon
+        self.Left = QAction(QtGui.QIcon("../Resources/Left.png"), self.T_MoveLeft, self)  # add student icon
         self.Left.triggered.connect(self.Move_Left)
         self.Left.setShortcut("Left")
         self.Left.setStatusTip("Pan Left")
-        self.Right = QAction(QtGui.QIcon("../Resources/Right.jpg"), self.T_MoveRight, self)  # add student icon
+        self.Right = QAction(QtGui.QIcon("../Resources/Right.png"), self.T_MoveRight, self)  # add student icon
         self.Right.triggered.connect(self.Move_Right)
         self.Right.setShortcut("Right")
         self.Right.setStatusTip("Pan Right")
@@ -245,7 +260,7 @@ class Window(QMainWindow):
         self.ZoomOut.triggered.connect(self.Zoom_Out)
         self.ZoomOut.setShortcut("-")
         self.ZoomOut.setStatusTip("Zoom Out")
-        self.Maximize = QAction(QtGui.QIcon("../Resources/Minimize.png"),self.T_Maximize,self)
+        self.Maximize = QAction(QtGui.QIcon("../Resources/Maximize.png"),self.T_Maximize,self)
         self.Maximize.triggered.connect(self.Fun_Maximize)
         self.Maximize.setShortcut("Alt+M")
         self.Maximize.setStatusTip("Maximize")
@@ -274,10 +289,6 @@ class Window(QMainWindow):
         toolbar.addAction(self.About)
         self.statusBar().show()
 
-
-
-
-
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)
         painter.drawImage(0, 50, self.image)
@@ -285,13 +296,16 @@ class Window(QMainWindow):
 
     def Face_Detect(self):
         print("Function Face Detect Connected")
+        self.message.show()
+        self.message.setText("Face Detection Started")
         if self.grabber.SetFaceDetection == True :
-            self.statusBar().showMessage("Face Detection Stopped")
+            self.message.setText("Face Detection : OFF")
             self.grabber.SetFaceDetection = False
         else :
             self.grabber.SetFaceDetection = True
-            self.statusBar().showMessage("Face Detection Started")
-
+            self.message.setText("Face Detection : ON")
+            self.timer1.start(5000)
+            self.timer1.timeout.connect(self.Hide)
 
         self.grabber.SetMotionDetection = False
 
@@ -300,17 +314,14 @@ class Window(QMainWindow):
     def Motion_Detect(self):
         print("Function Motion Detect Connected")
         if self.grabber.SetMotionDetection == True:
-            self.statusBar().showMessage("Motion Detection Stopped")
             self.grabber.SetMotionDetection = False
             try:
                 cv2.destroyWindow("motion video")
             except:
                 print('motion video already closed')
         else:
-            self.statusBar().showMessage("Motion Detection Started")
+
             self.grabber.SetMotionDetection = True
-
-
 
         self.grabber.SetFaceDetection = False
 
@@ -356,13 +367,21 @@ class Window(QMainWindow):
     def Fun_Maximize(self):
         self.move(200,5)
         self.grabber.windowzoomsize = (self.grabber.windowzoomsize + 1) % 2
+        if(self.grabber.windowzoomsize==1):
+            self.lcd.move(670,50)
+            self.message.move(677,90)
+        else:
+            self.lcd.move(510, 50)
+            self.message.move(517, 90)
 
     def Funtion_Time(self):
         self.lcd.clear()
         self.time=40
 
+    def Hide(self):
+        self.message.hide()
+
     def Fun_Exit(self):
-        #self.lcd.setText("Time Remaining :"+str(self.time)+" Seconds")
         if self.time==0:
             QApplication.quit()
         elif(self.time>5):
