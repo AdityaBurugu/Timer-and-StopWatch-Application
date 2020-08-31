@@ -2,10 +2,9 @@ import numpy as np
 import os
 import cv2
 import datetime
-
-filename = "Video.avi"
-print(datetime.date.day)
-frames_per_second = 24.0
+cap = cv2.VideoCapture(0)
+filename = "Video.mp4"
+frames_per_second = 14.0
 myres = "720p"
 def change_res(cap, width, height):
     cap.set(3, width)
@@ -35,7 +34,7 @@ def get_video_type(filename):
       return  VIDEO_TYPE[ext]
     return VIDEO_TYPE['avi']
 
-cap = cv2.VideoCapture(0)
+
 
 dims = get_dims(cap,res=myres)
 video_type_cv2 = get_video_type(filename)

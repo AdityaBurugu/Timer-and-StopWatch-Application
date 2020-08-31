@@ -6,13 +6,15 @@ from PyQt5 import QtGui, QtCore, QtWidgets
 
 from PyQt5.QtCore import QRect,QTimer
 import cv2
-from ONVIFCameraControl import ONVIFCameraControl,ONVIFCameraControlError
+from ONVIFCameraControl import ONVIFCameraControl
 import numpy as np
-from time import strftime,sleep
+from time import sleep
 
 #import dlib
 fwidth = 400
 fheight = 300
+from Audio import myAudioThread
+
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 # This allows us to detect faces in images
 #face_detector = dlib.get_frontal_face_detector()
@@ -77,7 +79,6 @@ class FrameGrabber(QtCore.QThread):
         self.windowzoomsize = 0
         self.SetFaceDetection = False
         self.SetMotionDetection = False
-       # self.SetNormalVideo = True
 
     signal = QtCore.pyqtSignal(QtGui.QImage)
     signalm = QtCore.pyqtSignal(np.ndarray)
@@ -89,18 +90,12 @@ class FrameGrabber(QtCore.QThread):
         cap = cv2.VideoCapture(f'rtsp://admin:admin@{self.CamIP}:554/cam/realmonitor?channel=1&subtype=2')
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 400)
-        #width = camera.set(CAP_PROP_FRAME_WIDTH, 1600)
-        #height = camera.set(CAP_PROP_FRAME_HEIGHT, 1080)
-       # cap.set(cv2.CAP_PROP_FPS, 4)
         while cap.isOpened():
-            #if self.SetNormalVideo == True:
             for _ in range(1):
                 success, frame = cap.read()
             if self.windowzoomsize == 2:
-                success, frame = cap.read()
-                success, frame = cap.read()
-                success, frame = cap.read()
-                success, frame = cap.read()
+                for _ in range(4):
+                    success, frame = cap.read()
             if self.SetFaceDetection == True:
                 for _ in range(5):
                     success, frame = cap.read()
@@ -167,8 +162,6 @@ class Window(QMainWindow):
         self.grabber.signal.connect(self.updateFrame)
         self.grabber.signalm.connect(self.motionimage)
         self.grabber.start()
-        #self.cam = ONVIFCameraControl((CamIP, 80), "admin", "admin")
-        #self.cam.goto_preset(preset_token="2")
         self.timer = QTimer(self)
         self.time = 40
         self.timer.start(1000)
@@ -299,11 +292,13 @@ class Window(QMainWindow):
         self.message.show()
         self.message.setText("Face Detection Started")
         if self.grabber.SetFaceDetection == True :
-            self.message.setText("Face Detection : OFF")
             self.grabber.SetFaceDetection = False
+            self.message.setText("Face Detection : OFF")
+            myAudioThread("Face Detection : OFFFFFFFFFFFFFF").start()
         else :
             self.grabber.SetFaceDetection = True
             self.message.setText("Face Detection : ON")
+            myAudioThread("Face Detection : ONNNNNNNN").start()
             self.timer1.start(5000)
             self.timer1.timeout.connect(self.Hide)
 
@@ -376,6 +371,8 @@ class Window(QMainWindow):
 
     def Funtion_Time(self):
         self.lcd.clear()
+        self.lcd.clear()
+        self.lcd.clear()
         self.time=40
 
     def Hide(self):
@@ -386,20 +383,32 @@ class Window(QMainWindow):
             QApplication.quit()
         elif(self.time>5):
             self.lcd.clear()
+            self.lcd.clear()
+            self.lcd.clear()
+            myAudioThread(str(self.time)).start()
             self.lcd.setText("Time Remaining :" + str(self.time) + " Seconds")
             self.time = self.time - 1
             self.color_effect.setColor(QtCore.Qt.yellow)
             self.lcd.setGraphicsEffect(self.color_effect)
-        elif(self.time<=5):
+        elif(self.time<=5 and self.time>1):
             self.lcd.clear()
+            self.lcd.clear()
+            self.lcd.clear()
+            myAudioThread(str(self.time)).start()
             self.lcd.setText("Time Remaining :" + str(self.time) + " Seconds")
             self.time = self.time - 1
             self.color_effect.setColor(QtCore.Qt.white)
             self.lcd.setGraphicsEffect(self.color_effect)
         elif(self.time==1):
-            #self.lcd.setText("Time Remaining :" + str(self.time) + " Second")
+            self.lcd.clear()
+            self.lcd.clear()
+            self.lcd.clear()
+            self.lcd.setText("Time Remaining :" + str(self.time) + " Second")
+            myAudioThread("Time Up").start()
             self.time=self.time-1
         else:
+            self.lcd.clear()
+            self.lcd.clear()
             self.lcd.clear()
             self.time=self.time-1
     def Main_Exit(self):
