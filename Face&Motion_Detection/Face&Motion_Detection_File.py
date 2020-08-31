@@ -1,18 +1,24 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow,\
     QToolBar, QAction,QTableWidget,QTableWidgetItem,QHeaderView,QVBoxLayout
+
 import sys
+
 from PyQt5 import QtGui, QtCore, QtWidgets
 
-from PyQt5.QtCore import QRect,QTimer
+from PyQt5.QtCore import QTimer
+
 import cv2
+
 from ONVIFCameraControl import ONVIFCameraControl
+
 import numpy as np
+
 from time import sleep
 
+from Audio import myAudioThread
 #import dlib
 fwidth = 400
 fheight = 300
-from Audio import myAudioThread
 
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 # This allows us to detect faces in images
@@ -387,7 +393,7 @@ class Window(QMainWindow):
             self.lcd.clear()
             self.lcd.clear()
             self.lcd.clear()
-            myAudioThread(str(self.time),350).start()
+            myAudioThread(str(self.time),300).start()
             self.lcd.setText("Time Remaining :" + str(self.time) + " Seconds")
             self.time = self.time - 1
             self.color_effect.setColor(QtCore.Qt.white)
