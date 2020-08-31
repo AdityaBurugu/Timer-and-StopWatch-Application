@@ -5,10 +5,11 @@ import pyttsx3
 
 ########################################################################################################################
 class myAudioThread(threading.Thread):
-   def __init__(self, text, Vol_level = 0.8):
+   def __init__(self, text,rate1 ,Vol_level = 0.8):
        threading.Thread.__init__(self)
        self.text = text
        self.Vol_level = Vol_level
+       self.rate = rate1
 
 ########################################################################################################################
    def run(self):
@@ -19,8 +20,7 @@ class myAudioThread(threading.Thread):
         self.engine = pyttsx3.init()
        # rate = self.engine.getProperty('rate')  # getting details of current speaking rate
         # print (rate)                        #printing current voice rate
-        rate = 350
-        self.engine.setProperty('rate', rate)  # setting up new voice rate
+        self.engine.setProperty('rate', self.rate)  # setting up new voice rate
       #  volume = self.engine.getProperty('volume')  # getting to know current volume level (min=0 and max=1)
         # print (volume)                          #printing current volume level
       #  self.engine.setProperty('volume', self.Vol_level)  # setting up volume level  between 0 and 1
@@ -35,7 +35,7 @@ class myAudioThread(threading.Thread):
 
 ########################################################################################################################
 if __name__ == '__main__':
-    myAudioThread('Face Detection is Off').start()
+    myAudioThread('Face Detection is Off',50).start()
 
 
 #myAudioThread('hai Bhaskar').start()

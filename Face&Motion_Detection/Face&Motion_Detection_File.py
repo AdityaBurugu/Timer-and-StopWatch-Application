@@ -1,6 +1,5 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow,QDateEdit,QFrame, QPushButton,QTextEdit, QLabel,\
-    QLineEdit,QToolBar,QComboBox, QMenu, QAction,QTableWidget,QTableWidgetItem,QHeaderView,\
-    QVBoxLayout,QWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow,\
+    QToolBar, QAction,QTableWidget,QTableWidgetItem,QHeaderView,QVBoxLayout
 import sys
 from PyQt5 import QtGui, QtCore, QtWidgets
 
@@ -35,7 +34,7 @@ class Shortcuts(QtWidgets.QDialog):
 
         layout = QVBoxLayout()
 
-        self.tableWidget = QtWidgets.QTableWidget()
+        self.tableWidget = QTableWidget()
 
         self.tableWidget.setColumnCount(2)
         self.tableWidget.setRowCount(13)
@@ -115,10 +114,7 @@ class FrameGrabber(QtCore.QThread):
                     gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
                     # Converting gray scale image to GaussianBlur, so that change can be find easily
                     blur = cv2.GaussianBlur(gray, (5, 5), 0)
-                    # If pixel value is greater than 20, it is assigned white(255) otherwise black
                     _, thresh = cv2.threshold(blur, 20, 255, cv2.THRESH_BINARY)
-                   # frame = np.ndarray(thresh)
-                    #print(type(thresh))
                     thresh1 = rescale_frame(thresh,30)
                     self.signalm.emit(thresh1)
                     frame1 = frame2
@@ -130,14 +126,11 @@ class FrameGrabber(QtCore.QThread):
                 self.image = QtGui.QImage(frame, frame.shape[1], frame.shape[0], QtGui.QImage.Format_BGR888)
                 if self.windowzoomsize == 0:
                     self.image = self.image.scaled(800, 600)
-                    #print('False')
                 elif self.windowzoomsize == 1 :
                     self.image = self.image.scaled(960, 720)
                 else :
                     self.image = self.image.scaled(1280,1080)
-                #if self.SetMotionDetection == False :
                 self.signal.emit(self.image)
-                #self.signalm.emit(frame)
 
 class Window(QMainWindow):
     def __init__(self, windowTitle,CamIP):
@@ -150,7 +143,7 @@ class Window(QMainWindow):
         self.top = 0
         self.width = 800
         self.height = 650
-        Icon = "Icon.png"
+        Icon = "../Resources/Window_Icon.png"
         self.setWindowIcon(QtGui.QIcon(Icon))
         self.setWindowTitle(windowTitle)
         self.setGeometry(200,  50, 810, 875)
@@ -294,11 +287,11 @@ class Window(QMainWindow):
         if self.grabber.SetFaceDetection == True :
             self.grabber.SetFaceDetection = False
             self.message.setText("Face Detection : OFF")
-            myAudioThread("Face Detection : OFFFFFFFFFFFFFF").start()
+            myAudioThread("Face Detection : OFFFFFFFFFFFFFF",150).start()
         else :
             self.grabber.SetFaceDetection = True
             self.message.setText("Face Detection : ON")
-            myAudioThread("Face Detection : ONNNNNNNN").start()
+            myAudioThread("Face Detection : ONNNNNNNN",150).start()
             self.timer1.start(5000)
             self.timer1.timeout.connect(self.Hide)
 
@@ -380,7 +373,7 @@ class Window(QMainWindow):
 
     def Fun_Exit(self):
         if self.time==0:
-            myAudioThread("Time Up").start()
+            myAudioThread("Time Up",350).start()
             QApplication.quit()
         elif(self.time>5):
             self.lcd.clear()
@@ -394,7 +387,7 @@ class Window(QMainWindow):
             self.lcd.clear()
             self.lcd.clear()
             self.lcd.clear()
-            myAudioThread(str(self.time)).start()
+            myAudioThread(str(self.time),350).start()
             self.lcd.setText("Time Remaining :" + str(self.time) + " Seconds")
             self.time = self.time - 1
             self.color_effect.setColor(QtCore.Qt.white)
@@ -403,7 +396,7 @@ class Window(QMainWindow):
             self.lcd.clear()
             self.lcd.clear()
             self.lcd.clear()
-            myAudioThread(str(self.time)).start()
+            myAudioThread(str(self.time),350).start()
             self.lcd.setText("Time Remaining :" + str(self.time) + " Second")
             self.time=self.time-1
         else:
