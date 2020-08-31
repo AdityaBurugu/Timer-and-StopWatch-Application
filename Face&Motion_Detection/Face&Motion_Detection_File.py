@@ -380,12 +380,12 @@ class Window(QMainWindow):
 
     def Fun_Exit(self):
         if self.time==0:
+            myAudioThread("Time Up").start()
             QApplication.quit()
         elif(self.time>5):
             self.lcd.clear()
             self.lcd.clear()
             self.lcd.clear()
-            myAudioThread(str(self.time)).start()
             self.lcd.setText("Time Remaining :" + str(self.time) + " Seconds")
             self.time = self.time - 1
             self.color_effect.setColor(QtCore.Qt.yellow)
@@ -403,8 +403,8 @@ class Window(QMainWindow):
             self.lcd.clear()
             self.lcd.clear()
             self.lcd.clear()
+            myAudioThread(str(self.time)).start()
             self.lcd.setText("Time Remaining :" + str(self.time) + " Second")
-            myAudioThread("Time Up").start()
             self.time=self.time-1
         else:
             self.lcd.clear()
