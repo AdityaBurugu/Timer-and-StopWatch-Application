@@ -16,7 +16,7 @@ import numpy as np
 from time import sleep
 
 from Audio import myAudioThread
-#import dlib
+
 fwidth = 400
 fheight = 300
 
@@ -24,11 +24,13 @@ face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 # This allows us to detect faces in images
 #face_detector = dlib.get_frontal_face_detector()
 fgbg = cv2.createBackgroundSubtractorMOG2()
+
 def rescale_frame(frame, percent=75):
     width = int(frame.shape[1] * percent / 100)
     height = int(frame.shape[0] * percent / 100)
     dim = (width, height)
     return cv2.resize(frame, dim, interpolation=cv2.INTER_AREA)
+
 class Shortcuts(QtWidgets.QDialog):
     def __init__(self, *args, **kwargs):
         super(Shortcuts, self).__init__(*args, **kwargs)
@@ -80,6 +82,7 @@ class Shortcuts(QtWidgets.QDialog):
 class FrameGrabber(QtCore.QThread):
     def __init__(self, parent=None):
         super(FrameGrabber, self).__init__(parent)
+
         self.CamIP = 0
         self.windowzoomsize = 0
         self.SetFaceDetection = False
@@ -95,6 +98,7 @@ class FrameGrabber(QtCore.QThread):
         cap = cv2.VideoCapture(f'rtsp://admin:admin@{self.CamIP}:554/cam/realmonitor?channel=1&subtype=2')
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 400)
+
         while cap.isOpened():
             for _ in range(1):
                 success, frame = cap.read()
@@ -169,7 +173,9 @@ class Window(QMainWindow):
 
     def UiComponents(self):
         self.time = 40
+
         self.timer = QTimer(self)
+
         self.timer1 = QTimer(self)
         self.lcd = QtWidgets.QLabel(self)
         font = QtGui.QFont()  # Sets Font
@@ -199,6 +205,7 @@ class Window(QMainWindow):
         self.message.hide()
 
         self.timer.start(self.time * 1000)
+
         self.T_FaceDetect = "Face Detect"
         self.T_motionDetect = "Motion Detect"
         self.T_record = "Start Recording"
@@ -209,63 +216,78 @@ class Window(QMainWindow):
         self.T_ZoomIn = "Zoom In"
         self.T_ZoomOut = "Zoom Out"
         self.T_Maximize = "Maximize"
+
         toolbar = QToolBar()
         toolbar.setMovable(False)
         toolbar.setIconSize(QtCore.QSize(51, 35))
         toolbar.setStyleSheet("background-color : white")
+
         self.addToolBar(toolbar)
+
         self.Face = QAction(QtGui.QIcon("../Resources/Face2.png"), self.T_FaceDetect, self)  # add student icon
         self.Face.triggered.connect(self.Face_Detect)
         self.Face.setShortcut("F1")
         self.Face.setStatusTip("Face Detect")
+
         self.Motion = QtWidgets.QAction(QtGui.QIcon("../Resources/Motion.png"), self.T_motionDetect, self)  # add student icon
-        #self.Motion.setIconSize(QtCore.QSize(40, 40))
         self.Motion.triggered.connect(self.Motion_Detect)
         self.Motion.setShortcut("M")
         self.Motion.setStatusTip("Motion Detect")
+
         self.Record = QAction(QtGui.QIcon("../Resources/record.png"), self.T_record, self)  # add student icon
         self.Record.triggered.connect(self.Fun_Record)
         self.Record.setShortcut("Ctrl+R")
         self.Record.setStatusTip("Record")
+
         self.Up = QAction(QtGui.QIcon("../Resources/Up.png"), self.T_MoveUp, self)  # add student icon
         self.Up.triggered.connect(self.Move_Up)
         self.Up.setShortcut("Up")
         self.Up.setCheckable(True)
         self.Up.setStatusTip("Cam Tilt Up")
+
         self.Down = QAction(QtGui.QIcon("../Resources/Down.png"), self.T_MoveDown, self)  # add student icon
         self.Down.triggered.connect(self.Move_Down)
         self.Down.setShortcut("Down")
         self.Down.setStatusTip("Cam Tilt Down")
+
         self.Left = QAction(QtGui.QIcon("../Resources/Left.png"), self.T_MoveLeft, self)  # add student icon
         self.Left.triggered.connect(self.Move_Left)
         self.Left.setShortcut("Left")
         self.Left.setStatusTip("Pan Left")
+
         self.Right = QAction(QtGui.QIcon("../Resources/Right.png"), self.T_MoveRight, self)  # add student icon
         self.Right.triggered.connect(self.Move_Right)
         self.Right.setShortcut("Right")
         self.Right.setStatusTip("Pan Right")
+
         self.ZoomIn = QAction(QtGui.QIcon("../Resources/ZoomIn.png"),self.T_ZoomIn, self)  # add student icon
         self.ZoomIn.triggered.connect(self.Zoom_In)
         self.ZoomIn.setShortcut("=")
         self.ZoomIn.setStatusTip("Zoom In")
+
         self.ZoomOut = QAction(QtGui.QIcon("../Resources/ZoomOut.png"), self.T_ZoomOut, self)  # add student icon
         self.ZoomOut.triggered.connect(self.Zoom_Out)
         self.ZoomOut.setShortcut("-")
         self.ZoomOut.setStatusTip("Zoom Out")
+
         self.Maximize = QAction(QtGui.QIcon("../Resources/Maximize.png"),self.T_Maximize,self)
         self.Maximize.triggered.connect(self.Fun_Maximize)
         self.Maximize.setShortcut("Alt+M")
         self.Maximize.setStatusTip("Maximize")
+
         self.TimeIncrement = QtWidgets.QAction(QtGui.QIcon("../Resources/Clock.jpg"),"Clock",self)
         self.TimeIncrement.triggered.connect(self.Funtion_Time)
         self.TimeIncrement.setShortcut("T")
         self.TimeIncrement.setStatusTip("Clock")
+
         self.Exit = QAction(QtGui.QIcon("../Resources/Exit1.png"),"Exit",self)
         self.Exit.setShortcut("Esc")
         self.Exit.triggered.connect(self.Main_Exit)
+
         self.About = QAction(QtGui.QIcon("../Resources/About.png"),"Shortcuts",self)
         self.About.setShortcut("I")
         self.About.triggered.connect(self.Fun_About)
+
         toolbar.addAction(self.Face)
         toolbar.addAction(self.Motion)
         toolbar.addAction(self.Record)
@@ -279,6 +301,7 @@ class Window(QMainWindow):
         toolbar.addAction(self.TimeIncrement)
         toolbar.addAction(self.Exit)
         toolbar.addAction(self.About)
+
         self.statusBar().show()
 
     def paintEvent(self, event):
@@ -314,7 +337,6 @@ class Window(QMainWindow):
             except:
                 print('motion video already closed')
         else:
-
             self.grabber.SetMotionDetection = True
 
         self.grabber.SetFaceDetection = False
@@ -322,42 +344,49 @@ class Window(QMainWindow):
     def Fun_Record(self):
         print("Function Record Connected")
         self.statusBar().showMessage("Started Recording")
+
     def Move_Up(self):
         print("Function Move Up Connected")
         ptz_velocity_vector = (0, 0.25, 0)
         self.cam.move_continuous(ptz_velocity_vector)
         sleep(0.25)
         self.cam.stop()
+
     def Move_Down(self):
         print("Function Move Down Connected")
         ptz_velocity_vector = (0, -0.25, 0)
         self.cam.move_continuous(ptz_velocity_vector)
         sleep(0.25)
         self.cam.stop()
+
     def Move_Left(self):
         print("Function Move Left Connected")
         ptz_velocity_vector = (-0.25, 0, 0)
         self.cam.move_continuous(ptz_velocity_vector)
         sleep(0.25)
         self.cam.stop()
+
     def Move_Right(self):
         print("Function Move Right Connected")
         ptz_velocity_vector = (0.25, 0, 0)
         self.cam.move_continuous(ptz_velocity_vector)
         sleep(0.25)
         self.cam.stop()
+
     def Zoom_In(self):
         print("Function Zoom In Connected")
         ptz_velocity_vector = (0, 0, 0.05)
         self.cam.move_continuous(ptz_velocity_vector)
         sleep(1)
         self.cam.stop()
+
     def Zoom_Out(self):
         print("Function Zoom Out Connected")
         ptz_velocity_vector = (0, 0, -0.05)
         self.cam.move_continuous(ptz_velocity_vector)
         sleep(1)
         self.cam.stop()
+
     def Fun_Maximize(self):
         self.move(200,5)
         self.grabber.windowzoomsize = (self.grabber.windowzoomsize + 1) % 2
@@ -379,22 +408,22 @@ class Window(QMainWindow):
 
     def Fun_Exit(self):
         if self.time==0:
-            myAudioThread("Time Up",350).start()
+            myAudioThread("Taimmme Uppp",300).start()
             QApplication.quit()
         elif(self.time>5):
             self.lcd.clear()
             self.lcd.clear()
             self.lcd.clear()
-            self.lcd.setText("Time Remaining :" + str(self.time) + " Seconds")
+            self.lcd.setText("Time Remaining: " + str(self.time) + " Seconds")
             self.time = self.time - 1
             self.color_effect.setColor(QtCore.Qt.yellow)
             self.lcd.setGraphicsEffect(self.color_effect)
-        elif(self.time<=5 and self.time>1):
+        elif(self.time<6 and self.time>1):
             self.lcd.clear()
             self.lcd.clear()
             self.lcd.clear()
             myAudioThread(str(self.time),300).start()
-            self.lcd.setText("Time Remaining :" + str(self.time) + " Seconds")
+            self.lcd.setText("Time Remaining: " + str(self.time) + " Seconds")
             self.time = self.time - 1
             self.color_effect.setColor(QtCore.Qt.white)
             self.lcd.setGraphicsEffect(self.color_effect)
@@ -403,13 +432,14 @@ class Window(QMainWindow):
             self.lcd.clear()
             self.lcd.clear()
             myAudioThread(str(self.time),350).start()
-            self.lcd.setText("Time Remaining :" + str(self.time) + " Second")
+            self.lcd.setText("Time Remaining: " + str(self.time) + " Second")
             self.time=self.time-1
         else:
             self.lcd.clear()
             self.lcd.clear()
             self.lcd.clear()
             self.time=self.time-1
+
     def Main_Exit(self):
         QApplication.quit()
 
