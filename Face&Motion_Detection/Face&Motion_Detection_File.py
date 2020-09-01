@@ -175,6 +175,7 @@ class Window(QMainWindow):
         self.time = 40
 
         self.timer = QTimer(self)
+        self.timer.start(self.time * 1000)
 
         self.timer1 = QTimer(self)
         self.lcd = QtWidgets.QLabel(self)
@@ -203,8 +204,6 @@ class Window(QMainWindow):
         self.message.setGraphicsEffect(self.color_effect1)
         self.message.setGeometry(517, 90, 290, 30)
         self.message.hide()
-
-        self.timer.start(self.time * 1000)
 
         self.T_FaceDetect = "Face Detect"
         self.T_motionDetect = "Motion Detect"
@@ -397,6 +396,8 @@ class Window(QMainWindow):
             self.message.move(517, 90)
 
     def Funtion_Time(self):
+        self.timer.stop()
+        self.timer.start()
         self.lcd.clear()
         self.lcd.clear()
         self.lcd.clear()
