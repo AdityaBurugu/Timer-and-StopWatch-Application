@@ -312,15 +312,14 @@ class Window(QMainWindow):
     def Face_Detect(self):
         print("Function Face Detect Connected")
         self.message.show()
-        self.message.setText("Face Detection Started")
         if self.grabber.SetFaceDetection == True :
             self.grabber.SetFaceDetection = False
             self.message.setText("Face Detection : OFF")
-            myAudioThread("Face Detection : OFFFFFFFFFFFFFF",150).start()
+            myAudioThread("Face Detection is OFFFFFFFFFFFFFF",150).start()
         else :
             self.grabber.SetFaceDetection = True
             self.message.setText("Face Detection : ON")
-            myAudioThread("Face Detection : ONNNNNNNN",150).start()
+            myAudioThread("Face Detection is ONNNNNNNN",150).start()
             self.timer1.start(5000)
             self.timer1.timeout.connect(self.Hide)
 
@@ -418,11 +417,11 @@ class Window(QMainWindow):
             self.time = self.time - 1
             self.color_effect.setColor(QtCore.Qt.yellow)
             self.lcd.setGraphicsEffect(self.color_effect)
-        elif(self.time<6 and self.time>1):
+        elif(self.time>1 and self.time<6):
+            myAudioThread(str(self.time), 300).start()
             self.lcd.clear()
             self.lcd.clear()
             self.lcd.clear()
-            myAudioThread(str(self.time),300).start()
             self.lcd.setText("Time Remaining: " + str(self.time) + " Seconds")
             self.time = self.time - 1
             self.color_effect.setColor(QtCore.Qt.white)
@@ -431,7 +430,7 @@ class Window(QMainWindow):
             self.lcd.clear()
             self.lcd.clear()
             self.lcd.clear()
-            myAudioThread(str(self.time),350).start()
+            myAudioThread(str(self.time),300).start()
             self.lcd.setText("Time Remaining: " + str(self.time) + " Second")
             self.time=self.time-1
         else:
