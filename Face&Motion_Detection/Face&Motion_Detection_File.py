@@ -15,7 +15,7 @@ import numpy as np
 
 from time import sleep
 
-from Audio import myAudioThread
+from myAudio import myAudioThread
 
 fwidth = 400
 fheight = 300
@@ -48,6 +48,13 @@ class Shortcuts(QtWidgets.QDialog):
         self.tableWidget.setRowCount(13)
         self.tableWidget.setHorizontalHeaderLabels(("Actions", "Shortcuts"))
         self.tableWidget.setDisabled(True)
+        self.color_effect3 = QtWidgets.QGraphicsColorizeEffect()
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setItalic(True)
+        self.tableWidget.setFont(font)
+        self.color_effect3.setColor(QtCore.Qt.darkGreen)
+        self.tableWidget.setGraphicsEffect(self.color_effect3)
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.tableWidget.setItem(0,0,QTableWidgetItem("Face Detection"))
         self.tableWidget.setItem(0,1,QTableWidgetItem("F1"))
@@ -133,7 +140,8 @@ class FrameGrabber(QtCore.QThread):
                     print('error in motion detetion')
                     #self.signalm.emit(frame)
             if success:
-                self.image = QtGui.QImage(frame, frame.shape[1], frame.shape[0], QtGui.QImage.Format_BGR888)
+                frame100 = rescale_frame(frame,75)
+                self.image = QtGui.QImage(frame100, frame100.shape[1], frame100.shape[0], QtGui.QImage.Format_BGR888)
                 if self.windowzoomsize == 0:
                     self.image = self.image.scaled(800, 600)
                 elif self.windowzoomsize == 1 :
@@ -408,9 +416,11 @@ class Window(QMainWindow):
 
     def Fun_Exit(self):
         if self.time==0:
-            myAudioThread("Taimmme Uppp",300).start()
+            myAudioThread("Taaiimmme Uppp",300).start()
             QApplication.quit()
         elif(self.time>5):
+            self.timer.stop()
+            self.timer.start()
             self.lcd.clear()
             self.lcd.clear()
             self.lcd.clear()
@@ -420,6 +430,8 @@ class Window(QMainWindow):
             self.lcd.setGraphicsEffect(self.color_effect)
         elif(self.time>1 and self.time<6):
             myAudioThread(str(self.time), 300).start()
+            self.timer.stop()
+            self.timer.start()
             self.lcd.clear()
             self.lcd.clear()
             self.lcd.clear()
@@ -428,6 +440,8 @@ class Window(QMainWindow):
             self.color_effect.setColor(QtCore.Qt.white)
             self.lcd.setGraphicsEffect(self.color_effect)
         elif(self.time==1):
+            self.timer.stop()
+            self.timer.start()
             self.lcd.clear()
             self.lcd.clear()
             self.lcd.clear()
@@ -435,6 +449,8 @@ class Window(QMainWindow):
             self.lcd.setText("Time Remaining: " + str(self.time) + " Second")
             self.time=self.time-1
         else:
+            self.timer.stop()
+            self.timer.start()
             self.lcd.clear()
             self.lcd.clear()
             self.lcd.clear()
