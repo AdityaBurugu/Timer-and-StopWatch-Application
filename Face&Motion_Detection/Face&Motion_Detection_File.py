@@ -248,9 +248,9 @@ class Window(QMainWindow):
         self.Record.setStatusTip("Record")
 
         self.Up = QAction(QtGui.QIcon("../Resources/Up.png"), self.T_MoveUp, self)  # add student icon
+        self.Up.setCheckable(True)
         self.Up.triggered.connect(self.Move_Up)
         self.Up.setShortcut("Up")
-        self.Up.setCheckable(True)
         self.Up.setStatusTip("Cam Tilt Up")
 
         self.Down = QAction(QtGui.QIcon("../Resources/Down.png"), self.T_MoveDown, self)  # add student icon
