@@ -140,7 +140,7 @@ class FrameGrabber(QtCore.QThread):
                     print('error in motion detetion')
                     #self.signalm.emit(frame)
             if success:
-                frame100 = rescale_frame(frame,75)
+                frame100 = rescale_frame(frame,125)
                 self.image = QtGui.QImage(frame100, frame100.shape[1], frame100.shape[0], QtGui.QImage.Format_BGR888)
                 if self.windowzoomsize == 0:
                     self.image = self.image.scaled(800, 600)
@@ -174,13 +174,13 @@ class Window(QMainWindow):
         self.grabber.signalm.connect(self.motionimage)
         self.grabber.start()
         self.timer = QTimer(self)
-        self.time = 40
+        self.time = 100
         self.timer.start(1000)
         self.timer.timeout.connect(self.Fun_Exit)
         self.show()
 
     def UiComponents(self):
-        self.time = 40
+        self.time = 100
 
         self.timer = QTimer(self)
         self.timer.start(self.time * 1000)
@@ -381,14 +381,14 @@ class Window(QMainWindow):
 
     def Zoom_In(self):
         print("Function Zoom In Connected")
-        ptz_velocity_vector = (0, 0, 0.05)
+        ptz_velocity_vector = (0, 0, 0.011)
         self.cam.move_continuous(ptz_velocity_vector)
         sleep(1)
         self.cam.stop()
 
     def Zoom_Out(self):
         print("Function Zoom Out Connected")
-        ptz_velocity_vector = (0, 0, -0.05)
+        ptz_velocity_vector = (0, 0, -0.011)
         self.cam.move_continuous(ptz_velocity_vector)
         sleep(1)
         self.cam.stop()
@@ -409,7 +409,7 @@ class Window(QMainWindow):
         self.lcd.clear()
         self.lcd.clear()
         self.lcd.clear()
-        self.time=40
+        self.time=100
 
     def Hide(self):
         self.message.hide()
