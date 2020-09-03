@@ -164,7 +164,8 @@ class Window(QMainWindow):
         Icon = "../Resources/Window_Icon.png"
         self.setWindowIcon(QtGui.QIcon(Icon))
         self.setWindowTitle(windowTitle)
-        self.setGeometry(200,  50, 810, 875)
+        self.move(200,5)
+        self.resize(810,600)
         self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.CustomizeWindowHint)
         self.UiComponents()
         self.grabber = FrameGrabber()
@@ -224,12 +225,12 @@ class Window(QMainWindow):
         self.T_ZoomOut = "Zoom Out"
         self.T_Maximize = "Maximize"
 
-        toolbar = QToolBar()
-        toolbar.setMovable(False)
-        toolbar.setIconSize(QtCore.QSize(51, 35))
-        toolbar.setStyleSheet("background-color : white")
+        self.toolbar = QToolBar()
+        self.toolbar.setMovable(False)
+        self.toolbar.setIconSize(QtCore.QSize(51, 35))
+        self.toolbar.setStyleSheet("background-color : white")
 
-        self.addToolBar(toolbar)
+        self.addToolBar(self.toolbar)
 
         self.Face = QAction(QtGui.QIcon("../Resources/Face2.png"), self.T_FaceDetect, self)  # add student icon
         self.Face.triggered.connect(self.Face_Detect)
@@ -295,19 +296,19 @@ class Window(QMainWindow):
         self.About.setShortcut("I")
         self.About.triggered.connect(self.Fun_About)
 
-        toolbar.addAction(self.Face)
-        toolbar.addAction(self.Motion)
-        toolbar.addAction(self.Record)
-        toolbar.addAction(self.Up)
-        toolbar.addAction(self.Down)
-        toolbar.addAction(self.Left)
-        toolbar.addAction(self.Right)
-        toolbar.addAction(self.ZoomIn)
-        toolbar.addAction(self.ZoomOut)
-        toolbar.addAction(self.Maximize)
-        toolbar.addAction(self.TimeIncrement)
-        toolbar.addAction(self.Exit)
-        toolbar.addAction(self.About)
+        self.toolbar.addAction(self.Face)
+        self.toolbar.addAction(self.Motion)
+        self.toolbar.addAction(self.Record)
+        self.toolbar.addAction(self.Up)
+        self.toolbar.addAction(self.Down)
+        self.toolbar.addAction(self.Left)
+        self.toolbar.addAction(self.Right)
+        self.toolbar.addAction(self.ZoomIn)
+        self.toolbar.addAction(self.ZoomOut)
+        self.toolbar.addAction(self.Maximize)
+        self.toolbar.addAction(self.TimeIncrement)
+        self.toolbar.addAction(self.Exit)
+        self.toolbar.addAction(self.About)
 
         self.statusBar().show()
 
@@ -399,9 +400,11 @@ class Window(QMainWindow):
         if(self.grabber.windowzoomsize==1):
             self.lcd.move(670,50)
             self.message.move(677,90)
+            self.toolbar.setIconSize(QtCore.QSize(63, 35))
         else:
             self.lcd.move(510, 50)
             self.message.move(517, 90)
+            self.toolbar.setIconSize(QtCore.QSize(51,35))
 
     def Funtion_Time(self):
         self.timer.stop()
@@ -475,7 +478,7 @@ class Window(QMainWindow):
     @QtCore.pyqtSlot(np.ndarray)
     def motionimage(self, image):
         #print('Cv2.show')
-        cv2.imshow("motion video", image)
+        cv2.imshow("Motion Video", image)
 
 def Main():
     App = QApplication(sys.argv)
