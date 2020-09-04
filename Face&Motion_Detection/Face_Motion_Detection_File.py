@@ -15,6 +15,8 @@ import numpy as np
 
 from time import sleep
 
+import os
+
 from myAudio import myAudioThread
 
 fwidth = 400
@@ -102,7 +104,8 @@ class FrameGrabber(QtCore.QThread):
         static_back = None
         #CamIP = "192.168.1.23"
         #cap = cv2.VideoCapture(0)
-        cap = cv2.VideoCapture(f'rtsp://admin:admin@{self.CamIP}:554/cam/realmonitor?channel=1&subtype=2')
+        #cap = cv2.VideoCapture(f'rtsp://admin:admin@{self.CamIP}:554/cam/realmonitor?channel=1&subtype=2')
+        cap = cv2.VideoCapture(f'rtsp://admin:admin@{self.CamIP}/H264?ch=1&subtype=0')
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 400)
 
@@ -140,7 +143,7 @@ class FrameGrabber(QtCore.QThread):
                     print('error in motion detetion')
                     #self.signalm.emit(frame)
             if success:
-                frame100 = rescale_frame(frame,125)
+                frame100 = rescale_frame(frame,50)
                 self.image = QtGui.QImage(frame100, frame100.shape[1], frame100.shape[0], QtGui.QImage.Format_BGR888)
                 if self.windowzoomsize == 0:
                     self.image = self.image.scaled(800, 600)
@@ -151,11 +154,13 @@ class FrameGrabber(QtCore.QThread):
                 self.signal.emit(self.image)
 
 class Window(QMainWindow):
-    def __init__(self, windowTitle,CamIP):
+    def __init__(self, windowTitle,CamIP,timeDuaration):
         super().__init__()
 
         self.image = QtGui.QImage()
         self.setAttribute(QtCore.Qt.WA_OpaquePaintEvent)
+
+        self.timeDuaration = timeDuaration
 
         self.left = 5
         self.top = 0
@@ -175,13 +180,13 @@ class Window(QMainWindow):
         self.grabber.signalm.connect(self.motionimage)
         self.grabber.start()
         self.timer = QTimer(self)
-        self.time = 100
+        self.time = self.timeDuaration
         self.timer.start(1000)
         self.timer.timeout.connect(self.Fun_Exit)
         self.show()
 
     def UiComponents(self):
-        self.time = 100
+        self.time = self.timeDuaration
 
         self.timer = QTimer(self)
         self.timer.start(self.time * 1000)
@@ -300,9 +305,9 @@ class Window(QMainWindow):
         self.toolbar.addAction(self.Motion)
         self.toolbar.addAction(self.Record)
         self.toolbar.addAction(self.Up)
+        self.toolbar.addAction(self.Right)
         self.toolbar.addAction(self.Down)
         self.toolbar.addAction(self.Left)
-        self.toolbar.addAction(self.Right)
         self.toolbar.addAction(self.ZoomIn)
         self.toolbar.addAction(self.ZoomOut)
         self.toolbar.addAction(self.Maximize)
@@ -412,7 +417,7 @@ class Window(QMainWindow):
         self.lcd.clear()
         self.lcd.clear()
         self.lcd.clear()
-        self.time=100
+        self.time=self.timeDuaration
 
     def Hide(self):
         self.message.hide()
@@ -484,7 +489,7 @@ def Main():
     App = QApplication(sys.argv)
     CamIP = "192.168.1.10"
     windowTitle = CamIP
-    window = Window(windowTitle,CamIP)
+    window = Window(windowTitle,CamIP,timeDuaration=90)
     sys.exit(App.exec())
 
 if __name__ == "__main__":
