@@ -15,8 +15,6 @@ import numpy as np
 
 from time import sleep
 
-import os
-
 from myAudio import myAudioThread
 
 fwidth = 400
@@ -154,7 +152,7 @@ class FrameGrabber(QtCore.QThread):
                 self.signal.emit(self.image)
 
 class Window(QMainWindow):
-    def __init__(self, windowTitle,CamIP,timeDuaration):
+    def __init__(self, windowTitle,CamIP,timeDuaration=60):
         super().__init__()
 
         self.image = QtGui.QImage()
@@ -482,14 +480,13 @@ class Window(QMainWindow):
 
     @QtCore.pyqtSlot(np.ndarray)
     def motionimage(self, image):
-        #print('Cv2.show')
         cv2.imshow("Motion Video", image)
 
 def Main():
     App = QApplication(sys.argv)
     CamIP = "192.168.1.10"
     windowTitle = CamIP
-    window = Window(windowTitle,CamIP,timeDuaration=90)
+    window = Window(windowTitle,CamIP,80)
     sys.exit(App.exec())
 
 if __name__ == "__main__":
